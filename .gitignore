@@ -1,0 +1,6 @@
+.DS_Store
+build-tmp
+scheitern_generator/data/export/*
+scheitern_generator/data/export*/*
+data/export/*
+scheitern_generator/export/*
