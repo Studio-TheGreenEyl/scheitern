@@ -35,7 +35,7 @@ int textWidth = 1200;
 float lineSpacing = 2.5;
 float textLeading = 2.5;
 int margin = 15;
-int theFrames=0;
+int theFrames = 0;
 
 boolean recordVideo = true;
 

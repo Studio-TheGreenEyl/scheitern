@@ -24,6 +24,11 @@ class Bubble {
   Ani movement;
   PGraphics pg;
   
+  boolean hasImage = false;
+  PImage p = null;
+  
+  int maxHeight = 720;
+  
   String[][] months = {
     {"Jan", "Januar"},
     {"Feb", "Februar"},
@@ -62,41 +67,81 @@ class Bubble {
     longText = _longText;
     mediaSource = _mediaSource;
     source = _source;
+    
+    if(mediaSource.length() > 0) {
+      hasImage = true;
+      mediaSource = filenameParserForEditorsWhoUseUmlauteAndSpacesAndOtherWeirdThingsInTheirFiles(mediaSource);
+      p = loadImage("data/images/" + mediaSource); 
+    }
+    
     if(!field.equals("Bauhaus-Akteure")) alignment = width;
     else alignment = width*-1;
     x = margin*2;
     y = 0;
-    wpm = calcWPM();
-    boxHeight = calcHeight();
-    float lineLength = textWidth-margin*2-lineWeight; //width/12 * 4;
     
-    pg = createGraphics(textWidth+margin*2+lineWeight, (int)getBoxHeight()+margin);
+    wpm = calcWPM();
+    
+    if(hasImage) {
+      wpm = 20;
+      boxHeight = scaleWidth(p.width, p.height, textWidth+margin*2+lineWeight);
+      boxHeight = constrain(boxHeight, 0, 720);
+    } else {
+      boxHeight = calcHeight();
+    }
+    
+    float lineLength = textWidth-margin*2-lineWeight; //width/12 * 4;
+    float lineHeight = y+boxHeight-50;
+    //pg = createGraphics(textWidth+margin*2+lineWeight, (int)getBoxHeight()+margin);
+    pg = createGraphics(width, (int)getBoxHeight()+margin);
     pg.beginDraw();
+    
     pg.textFont(font, fontSize);
     pg.textLeading(fontSize+textLeading);
-    if(alignment < 0) pg.text(shortText, 0, 0, lineLength, getBoxHeight()+margin);
-    else pg.text(shortText, x, 0, lineLength, getBoxHeight()+margin);
-    
-    float lineHeight = y+boxHeight-50;
-    
+    if(!hasImage) {
+      if(alignment < 0) pg.text(shortText, 0, 0, lineLength, getBoxHeight()+margin);
+      else pg.text(shortText, x, 0, lineLength, getBoxHeight()+margin);
+    } else {
+      p.resize(textWidth+margin*2+lineWeight, 0);
+        float pX = x;
+        if(alignment < 0) pX = 0;
+        PImage cut = p.get(0, 0, textWidth+margin*2+lineWeight, 720);
+        pg.image(cut, pX, 0, lineLength, lineHeight-17-margin*2-20);
+        pg.push();
+        pg.fill(0);
+        pg.pop();
+        
+    }
+      
     pg.textFont(font2, 20);
     pg.fill(255);
     pg.noStroke();
 
+    
     if(alignment < 0) {
+      //println("links");
+      // horizontale
       pg.rect(0, lineHeight-17-margin*2, lineLength, lineWeight);
-      pg.rect(lineLength+margin*2, 0, lineWeight, boxHeight-50-17-margin*2+lineWeight);
+      // vertikale
+      if(!hasImage) pg.rect(lineLength+margin*2, 0, lineWeight, boxHeight-50-17-margin*2+lineWeight);
       pg.noFill();
       pg.stroke(255, 255, 255);
-      pg.text(author+", "+formatDate(date), 0, lineHeight-margin);
+      if(!hasImage) pg.text(author+", "+formatDate(date), 0, lineHeight-margin);
+      //else pg.text(description, 0, lineHeight-margin); // old style
+      else pg.text(description, 0, lineHeight-margin, lineLength, 60);
     } else {
+      //println("rechts");
       pg.textAlign(RIGHT);
+      // horizontale linie
       pg.rect(x, lineHeight-17-margin*2, lineLength, lineWeight);
-      pg.rect(0, 0, lineWeight, boxHeight-50-17-margin*2+lineWeight);
-      pg.noFill();
+      // vertikale
+      if(!hasImage) pg.rect(0, 0, lineWeight, boxHeight-50-17-margin*2+lineWeight);
+      //pg.noFill();
       pg.stroke(255, 255, 255);
-      pg.text(author+", "+formatDate(date), textWidth, lineHeight-margin);
+      if(!hasImage) pg.text(author+", "+formatDate(date), textWidth, lineHeight-margin);
+      //else pg.text(description, textWidth, lineHeight-margin, lineLength, 20);  // old style
+      else pg.text(description, x, lineHeight-margin, lineLength, 60);
     }
+    
     
     pg.endDraw();
     
@@ -307,6 +352,33 @@ class Bubble {
       s = "19" + s;
     }
     return s;
+  }
+  
+  
+  
+  String filenameParserForEditorsWhoUseUmlauteAndSpacesAndOtherWeirdThingsInTheirFiles(String s) {
+    String returner = s; 
+    returner = returner.replaceAll(" ", "_");
+    returner = returner.replaceAll("JPG", "jpg");
+    returner = returner.replaceAll("jpeg", "jpg");
+    returner = returner.replaceAll("JPEG", "jpg");
+    
+    returner = returner.replaceAll("ä", "ae");
+    returner = returner.replaceAll("ü", "ue");
+    returner = returner.replaceAll("ö", "oe");
+    returner = returner.replaceAll(",", "");
+    
+    
+   
+    return returner;
+  }
+  
+  float scaleWidth(float originalW, float originalH, float desiredWidth) {
+    return originalH / originalW * desiredWidth;
+  }
+  
+  float scaleHeight(float originalW, float originalH, float desiredHeight) {
+    return originalW / originalH * desiredHeight;
   }
   
 }

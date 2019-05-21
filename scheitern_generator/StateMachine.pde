@@ -11,7 +11,8 @@ void stateMachine() {
       if(!stateFinished) {
         //if(bla bla) stateFinished = true;
         println("> loading data");
-        input = loadStrings("data/data.tsv");
+        input = loadStrings("data/data__full.tsv");
+        //input = loadStrings("data/data.tsv");
         println("> "+ input.length + " lines");
         if(input.length > 0) stateFinished = true;
       } else {
@@ -33,15 +34,20 @@ void stateMachine() {
         // 4 = shorText, 5 = longText
         String[] splitter2 = split(splitter[4], "    ");
         if(splitter2.length == 1) {
-          if (!splitter[4].toLowerCase().contains(".jpg") && !splitter[4].toLowerCase().contains(".jpeg") && !splitter[4].toLowerCase().contains(".tif"))
-            bubbles.add(new Bubble(id, splitter[0], splitter[1], splitter[2], splitter[3], splitter[4], splitter[5], splitter[8], splitter[9] ));
+          //if (!splitter[4].toLowerCase().contains(".jpg") && !splitter[4].toLowerCase().contains(".jpeg") && !splitter[4].toLowerCase().contains(".tif"))
+          if (splitter[4].toLowerCase().contains(".jpg") || splitter[4].toLowerCase().contains(".jpeg") || splitter[4].toLowerCase().contains(".tif")) {
+            bubbles.add(new Bubble(id, splitter[0], splitter[1], splitter[2], splitter[3], splitter[4], splitter[5], splitter[4], splitter[9] ));
+          } else bubbles.add(new Bubble(id, splitter[0], splitter[1], splitter[2], splitter[3], splitter[4], splitter[5], "", splitter[9] ));
           id++;
+          
         } else {
           for(int j = 0; j<splitter2.length; j++) {
             // longText noch nicht geparst
-            if (!splitter2[j].toLowerCase().contains(".jpg") && !splitter2[j].toLowerCase().contains(".jpeg") && !splitter2[j].toLowerCase().contains(".tif")) 
-            bubbles.add(new Bubble(id, splitter[0], splitter[1], splitter[2], splitter[3], splitter2[j], splitter[5], splitter[8], splitter[9] ));
-            id++;
+            //if (!splitter2[j].toLowerCase().contains(".jpg") && !splitter2[j].toLowerCase().contains(".jpeg") && !splitter2[j].toLowerCase().contains(".tif"))
+            if (splitter2[j].toLowerCase().contains(".jpg") || splitter2[j].toLowerCase().contains(".jpeg") || splitter2[j].toLowerCase().contains(".tif")) {
+              bubbles.add(new Bubble(id, splitter[0], splitter[1], splitter[2], splitter[3], splitter2[j], splitter[5], splitter2[j], splitter[9] ));
+            } else bubbles.add(new Bubble(id, splitter[0], splitter[1], splitter[2], splitter[3], splitter2[j], splitter[5], "", splitter[9] ));
+           id++;
           }
         }
         state = BUBBLES;
@@ -72,6 +78,8 @@ void stateMachine() {
             onDisplay.remove(i);
           }
         }
+        // throws error. why?
+        // needs max height?
         if (bubbles.get(onDisplay.get(onDisplay.size()-1)).isThere() && !doNext) {
           doNext = true;
           interval = bubbles.get(index).getWPM()*bubbleInterval;
